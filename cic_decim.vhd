@@ -4,29 +4,29 @@
 -- use ieee.std_logic_1164.all;
 -- use ieee.numeric_std.all;
 
-entity cic_decim is
-	generic(
-		N_bit_in 		: natural := 32;
-		N_bit_out 		: natural := 84; -- for 6 stage 116 bits for 8 stage 134 bits for 3 stage 90 bits
-		N_sensors		: natural := 3
-	);
-	port(
-		clk				: in std_logic;
-		reset			: in std_logic;
+-- entity cic_decim is
+-- 	generic(
+-- 		N_bit_in 		: natural := 32;
+-- 		N_bit_out 		: natural := 84; -- for 6 stage 116 bits for 8 stage 134 bits for 3 stage 90 bits
+-- 		N_sensors		: natural := 3
+-- 	);
+-- 	port(
+-- 		clk				: in std_logic;
+-- 		reset			: in std_logic;
 		
-		data_in			: in std_logic_vector (N_bit_in-1 downto 0);
-		enable			: in std_logic;
-		run				: in std_logic;
-		in_sop			: in std_logic;
-		in_eop			: in std_logic;
+-- 		data_in			: in std_logic_vector (N_bit_in-1 downto 0);
+-- 		enable			: in std_logic;
+-- 		run				: in std_logic;
+-- 		in_sop			: in std_logic;
+-- 		in_eop			: in std_logic;
 		
-		data_out       	: out std_logic_vector(N_bit_out-1 downto 0);
-		ready          	: out std_logic;
-		out_sop			: out std_logic;
-		out_eop			: out std_logic
+-- 		data_out       	: out std_logic_vector(N_bit_out-1 downto 0);
+-- 		ready          	: out std_logic;
+-- 		out_sop			: out std_logic;
+-- 		out_eop			: out std_logic
 		
-	);
-end cic_decim;	
+-- 	);
+-- end cic_decim;	
 
 architecture behavior of cic_decim is 
 
