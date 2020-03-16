@@ -1,8 +1,8 @@
 -- cic_decim
 
--- library ieee;
--- use ieee.std_logic_1164.all;
--- use ieee.numeric_std.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity cic_decim is
 	generic(
@@ -31,11 +31,11 @@ end cic_decim;
 architecture behavior of cic_decim is 
 
 constant R_DECIM			: natural 	:= 200;
-constant NUM_STAGE			: natural	:= 6;
+constant NUM_STAGE			: natural	:= 3;
 
 type sensors_arr_type is array (0 to N_sensors-1) of signed (N_bit_out-1 downto 0);
-type integ_type is array (0 to N_sensors*NUM_STAGE-1) of signed (N_bit_out-1 downto 0);
-type comb_type is array (0 to N_sensors*NUM_STAGE+N_sensors-1) of signed (N_bit_out-1 downto 0);
+-- type integ_type is array (0 to N_sensors*NUM_STAGE-1) of signed (N_bit_out-1 downto 0);
+-- type comb_type is array (0 to N_sensors*NUM_STAGE+N_sensors-1) of signed (N_bit_out-1 downto 0);
 
 signal cnt 				: natural range 0 to R_DECIM := 1; 
 signal cnt_delay		: natural range 0 to NUM_STAGE-1 := 0; 
@@ -52,10 +52,19 @@ signal data_valid_sop	: std_logic := '0';
 signal data_valid_eop	: std_logic := '0';
 
 signal sensors_arr		: sensors_arr_type	:= (others => (others => '0'));
-signal integrator		: integ_type		:= (others => (others => '0'));
-signal delay1			: integ_type		:= (others => (others => '0'));
-signal delay2			: integ_type		:= (others => (others => '0'));
-signal combin			: comb_type			:= (others => (others => '0'));
+signal integrator0		: sensors_arr_type	:= (others => (others => '0'));
+signal integrator1		: sensors_arr_type	:= (others => (others => '0'));
+signal integrator2		: sensors_arr_type	:= (others => (others => '0'));
+signal i2delay1			: sensors_arr_type	:= (others => (others => '0'));
+signal i2delay2			: sensors_arr_type	:= (others => (others => '0'));
+signal c1delay1			: sensors_arr_type	:= (others => (others => '0'));
+signal c1delay2			: sensors_arr_type	:= (others => (others => '0'));
+signal c2delay1			: sensors_arr_type	:= (others => (others => '0'));
+signal c2delay2			: sensors_arr_type	:= (others => (others => '0'));
+signal combin0			: sensors_arr_type	:= (others => (others => '0'));
+signal combin1			: sensors_arr_type	:= (others => (others => '0'));
+signal combin2			: sensors_arr_type	:= (others => (others => '0'));
+signal combin3			: sensors_arr_type	:= (others => (others => '0'));
 
 begin
 	main:process(clk,reset)
@@ -82,11 +91,21 @@ begin
 			sensor_number  		<=  0;
 
 			sensors_arr			<= (others => (others => '0'));
-			integrator			<= (others => (others => '0'));
-			delay1				<= (others => (others => '0'));
-			delay2				<= (others => (others => '0'));
-			combin				<= (others => (others => '0'));
+			integrator0			<= (others => (others => '0'));
+			integrator1			<= (others => (others => '0'));
+			integrator2			<= (others => (others => '0'));
+			i2delay1			<= (others => (others => '0'));
+			i2delay2			<= (others => (others => '0'));
+			c1delay2			<= (others => (others => '0'));
+			c1delay2			<= (others => (others => '0'));
+			c2delay2			<= (others => (others => '0'));
+			c2delay2			<= (others => (others => '0'));
+			combin0				<= (others => (others => '0'));
+			combin1				<= (others => (others => '0'));
+			combin2				<= (others => (others => '0'));
+			combin3				<= (others => (others => '0'));
 			data_out         	<= (others => '0');
+
 		elsif (rising_edge(clk)) then
 			
 			if enable = '0' then
@@ -107,10 +126,18 @@ begin
 				out_sop				<= '0';
 				out_eop				<= '0';
 				sensors_arr			<= (others => (others => '0'));
-				integrator			<= (others => (others => '0'));
-				delay1				<= (others => (others => '0'));
-				delay2				<= (others => (others => '0'));
-				combin				<= (others => (others => '0'));
+				integrator0			<= (others => (others => '0'));
+				integrator1			<= (others => (others => '0'));
+				integrator2			<= (others => (others => '0'));
+				i2delay1			<= (others => (others => '0'));
+				i2delay2			<= (others => (others => '0'));
+				c1delay2			<= (others => (others => '0'));
+				c1delay2			<= (others => (others => '0'));
+				c2delay2			<= (others => (others => '0'));
+				c2delay2			<= (others => (others => '0'));
+				combin0				<= (others => (others => '0'));
+				combin1				<= (others => (others => '0'));
+				combin2				<= (others => (others => '0'));
 			else
 				if run = '1' then
 					if in_sop = '1' then
@@ -142,11 +169,9 @@ begin
 				end if;
 
 				if integ = '1' then 
-					integrator(channel_integ*NUM_STAGE) 			<= integrator(channel_integ*NUM_STAGE) + sensors_arr(channel_integ);
-					for k in 1 to NUM_STAGE-1 loop
-						integrator(channel_integ*NUM_STAGE+k)		<= 
-						integrator(channel_integ*NUM_STAGE+k) + integrator(channel_integ*NUM_STAGE+k-1);
-					end loop;
+					integrator0(channel_integ) 			<= integrator0(channel_integ) + sensors_arr(channel_integ);
+					integrator1(channel_integ)			<= integrator1(channel_integ) + integrator0(channel_integ);
+					integrator2(channel_integ)			<= integrator2(channel_integ) + integrator1(channel_integ);
 					if channel_integ = N_sensors-1 then				-- channel switch
 						channel_integ 		<= 0;
 						integ				<= '0';
@@ -169,12 +194,16 @@ begin
 				end if; 
 				
 				if comb = '1' then
-					combin(channel_comb*(NUM_STAGE+1))			<= integrator((channel_comb+1)*NUM_STAGE-1);--(N_bit_out-1 downto 1);
-					for k in 0 to NUM_STAGE-1 loop
-						delay1(channel_comb*NUM_STAGE+k) 			<= combin(channel_comb*(NUM_STAGE+1)+k);--(N_bit_out-1 downto 1);
-						delay2(channel_comb*NUM_STAGE+k) 			<= delay1(channel_comb*NUM_STAGE+k);
-						combin(channel_comb*(NUM_STAGE+1)+k+1)		<= combin(channel_comb*(NUM_STAGE+1)+k) - delay2(channel_comb*NUM_STAGE+k);--(N_bit_out-1 downto 1);
-					end loop;
+					combin0(channel_comb)				<= integrator2(channel_comb);					--(N_bit_out-1 downto 1);
+					i2delay1(channel_comb) 				<= combin0(channel_comb);						--(N_bit_out-1 downto 1);
+					i2delay2(channel_comb) 				<= i2delay1(channel_comb);
+					combin1(channel_comb)				<= combin0(channel_comb) - i2delay2(channel_comb);	--(N_bit_out-1 downto 1);
+					c1delay1(channel_comb)				<= combin1(channel_comb);
+					c1delay2(channel_comb)				<= c1delay1(channel_comb);
+					combin2(channel_comb)				<= combin1(channel_comb) - c1delay2(channel_comb);
+					c2delay1(channel_comb)				<= combin2(channel_comb);
+					c2delay2(channel_comb)				<= c2delay1(channel_comb);
+					combin3(channel_comb)				<= combin2(channel_comb) - c2delay2(channel_comb);
 					if channel_comb = N_sensors-1 then				-- channel switch
 						channel_comb 		<= 0;
 						comb 				<= '0';
@@ -190,7 +219,7 @@ begin
 				
 				if output = '1' then
 					ready 					<= '1';
-					data_out 				<= std_logic_vector(combin(channel_out*(NUM_STAGE+1)+NUM_STAGE));
+					data_out 				<= std_logic_vector(combin3(channel_out));
 					channel_out 			<= channel_out + 1;
 					if channel_out = 0 then
 						out_sop  			<= '1';
