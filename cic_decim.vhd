@@ -39,10 +39,10 @@ type sensors_arr_type is array (0 to N_sensors-1) of signed (N_bit_out-1 downto 
 
 signal cnt 				: natural range 0 to R_DECIM := 1; 
 signal cnt_delay		: natural range 0 to NUM_STAGE-1 := 0; 
-signal sensor_number	: natural	:= 0;
-signal channel_integ	: natural	:= 0;
-signal channel_comb		: natural	:= 0;
-signal channel_out		: natural	:= 0;
+signal sensor_number	: natural range 0 to N_sensors-1 := 0;
+signal channel_integ	: natural range 0 to N_sensors-1 := 0;
+signal channel_comb		: natural range 0 to N_sensors-1 := 0;
+signal channel_out		: natural range 0 to N_sensors-1 := 0;
 
 signal integ			: std_logic	:= '0';
 signal strob			: std_logic := '0';
@@ -220,10 +220,10 @@ begin
 				if output = '1' then
 					ready 					<= '1';
 					data_out 				<= std_logic_vector(combin3(channel_out));
-					channel_out 			<= channel_out + 1;
 					if channel_out = 0 then
 						out_sop  			<= '1';
 						out_eop  			<= '0';
+						channel_out 		<= channel_out + 1;
 					elsif channel_out = N_sensors-1 then
 						out_sop    			<= '0';
 						out_eop    			<= '1';
@@ -232,6 +232,7 @@ begin
 					else
 						out_sop  			<= '0';
 						out_eop  			<= '0';
+						channel_out 		<= channel_out + 1;
 					end if;
 				else
 					ready 					<= '0';
